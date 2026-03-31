@@ -1,4 +1,4 @@
-content = """# Traffic Multi-Object Tracking
+# Traffic Multi-Object Tracking
 
 > Real-time vehicle detection, tracking, and counting in traffic video using **YOLOv8** and **ByteTrack**.
 
@@ -21,13 +21,17 @@ Given a traffic video, the pipeline:
 
 ## Pipeline Architecture
 
-![Pipeline](docs/pipeline.png)
-```
-Traffic Video → YOLO Detector → ByteTrack → Line Counter → Annotator → Output Video
-```
+<p align="center">
+  <img src="docs/pipeline.png" alt="Pipeline">
+</p>
+The pipeline processes each video frame sequentially:
+
+- **YOLOv8 Detector** – Runs object detection to obtain bounding boxes for vehicles (cars, trucks, buses, etc.) with confidence scores.
+- **ByteTrack** – Associates detections across frames using a Kalman filter and matching strategy, assigning a unique ID to each tracked vehicle.
+- **Line Counter** – Checks each tracked vehicle's centroid against a predefined virtual line; increments count when a vehicle crosses.
+- **Annotator** – Draws bounding boxes, track IDs, class labels, and the current count on the output frame.
 
 ---
-
 ## Input / Output
 
 | Input Frame | Output Frame |
@@ -142,8 +146,3 @@ GitHub Actions runs all tests on every push automatically.
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-shiv1716-blue)](https://linkedin.com/in/shiv1716)
 [![GitHub](https://img.shields.io/badge/GitHub-SHIVCHAUDHARY17-black)](https://github.com/SHIVCHAUDHARY17)
 """
-
-with open("README.md", "w", encoding="utf-8") as f:
-    f.write(content)
-
-print("README.md written cleanly")
