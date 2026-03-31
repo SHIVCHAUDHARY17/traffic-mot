@@ -1,32 +1,16 @@
-\# Traffic Multi-Object Tracking
+\# 🚗 Traffic Multi-Object Tracking
 
 
 
-Real-time multi-object tracking pipeline for traffic videos using YOLOv8 and ByteTrack.
-
-Detects and tracks vehicles across frames with persistent IDs and counts vehicles crossing a virtual line.
+> Real-time vehicle detection, tracking, and counting in traffic video using \*\*YOLOv8\*\* and \*\*ByteTrack\*\*.
 
 
 
 !\[CI](https://github.com/SHIVCHAUDHARY17/traffic-mot/actions/workflows/ci.yml/badge.svg)
 
+!\[Python](https://img.shields.io/badge/python-3.11-blue)
 
-
-\---
-
-
-
-\## What this project does
-
-
-
-\- Detects vehicles (car, motorcycle, bus, truck) in traffic video using YOLOv8
-
-\- Assigns persistent track IDs across frames using ByteTrack
-
-\- Counts vehicles crossing a configurable virtual line
-
-\- Outputs annotated video with bounding boxes, class labels, track IDs, and live count
+!\[License](https://img.shields.io/badge/license-MIT-green)
 
 
 
@@ -34,11 +18,39 @@ Detects and tracks vehicles across frames with persistent IDs and counts vehicle
 
 
 
-\## Pipeline architecture
+\## 📌 Overview
+
+
+
+This project extends single-frame object detection into \*\*video-based dynamic perception\*\* — a core requirement in autonomous driving and intelligent transport systems.
+
+
+
+Given a traffic video, the pipeline:
+
+\- \*\*Detects\*\* vehicles frame-by-frame using YOLOv8
+
+\- \*\*Tracks\*\* each vehicle across frames with a persistent ID using ByteTrack
+
+\- \*\*Counts\*\* vehicles crossing a configurable virtual line
+
+\- \*\*Outputs\*\* a fully annotated video with bounding boxes, class labels, track IDs, and live count
+
+
+
+\---
+
+
+
+\## 🔁 Pipeline Architecture
+
+
+
+!\[Pipeline](docs/pipeline.png)
 
 ```
 
-Traffic video → YOLO detector → ByteTrack → Line counter → Annotated output video
+Traffic Video → Frame Reader → YOLO Detector → ByteTrack → Line Counter → Annotator → Output Video
 
 ```
 
@@ -48,7 +60,27 @@ Traffic video → YOLO detector → ByteTrack → Line counter → Annotated out
 
 
 
-\## Project structure
+\## 🎬 Input / Output
+
+
+
+| Input Frame | Output Frame |
+
+|---|---|
+
+| !\[Input](docs/input\_frame.jpg) | !\[Output](docs/output\_frame.jpg) |
+
+
+
+> Output frame at timestep 1550 — 14 vehicles tracked simultaneously with unique IDs and count overlay
+
+
+
+\---
+
+
+
+\## 📁 Project Structure
 
 ```
 
@@ -56,29 +88,31 @@ traffic-mot/
 
 ├── src/
 
-│   ├── detector.py      # YOLOv8 wrapper — per-frame detection
+│   ├── detector.py        # YOLOv8 wrapper — per-frame detection
 
-│   ├── tracker.py       # ByteTrack wrapper — persistent track IDs
+│   ├── tracker.py         # ByteTrack wrapper — persistent track IDs
 
-│   ├── analytics.py     # Line crossing counter
+│   ├── analytics.py       # Virtual line crossing counter
 
-│   ├── annotator.py     # Frame drawing — boxes, IDs, count overlay
+│   ├── annotator.py       # Draws boxes, IDs, count on each frame
 
-│   └── pipeline.py      # End-to-end orchestrator
+│   └── pipeline.py        # End-to-end orchestrator
 
 ├── configs/
 
-│   └── default.yaml     # All settings — model, thresholds, line position
+│   └── default.yaml       # All settings — model, thresholds, line position
 
 ├── tests/
 
-│   └── test\_analytics.py  # pytest unit tests
+│   └── test\_analytics.py  # pytest unit tests for counting logic
 
 ├── .github/workflows/
 
-│   └── ci.yml           # GitHub Actions CI
+│   └── ci.yml             # GitHub Actions CI — runs tests on every push
 
-└── run\_tracker.py       # CLI entry point
+├── docs/                  # Pipeline diagram and demo frames
+
+└── run\_tracker.py         # CLI entry point
 
 ```
 
@@ -88,7 +122,7 @@ traffic-mot/
 
 
 
-\## Setup
+\## ⚙️ Setup
 
 ```bash
 
@@ -98,7 +132,7 @@ cd traffic-mot
 
 python -m venv venv
 
-source venv/bin/activate        # Windows: venv\\Scripts\\activate
+venv\\Scripts\\activate        # Linux/Mac: source venv/bin/activate
 
 pip install -r requirements.txt
 
@@ -110,11 +144,11 @@ pip install -r requirements.txt
 
 
 
-\## Usage
+\## 🚀 Usage
 
 
 
-Place your traffic video in `data/` and run:
+Place your traffic video at `data/sample.mp4` and run:
 
 ```bash
 
@@ -124,7 +158,7 @@ python run\_tracker.py --config configs/default.yaml
 
 
 
-Output video saved to `outputs/tracked.mp4`
+Annotated output saved to `outputs/tracked.mp4`
 
 
 
@@ -132,21 +166,21 @@ Output video saved to `outputs/tracked.mp4`
 
 
 
-\## Configuration
+\## 🛠️ Configuration
 
 
 
-All settings are in `configs/default.yaml`:
+All settings live in `configs/default.yaml` — no code changes needed:
 
 ```yaml
 
 model:
 
-&#x20; weights: yolov8n.pt       # model size: n, s, m, l, x
+&#x20; weights: yolov8n.pt     # swap to yolov8s.pt or yolov8m.pt for more accuracy
 
-&#x20; confidence: 0.3           # detection confidence threshold
+&#x20; confidence: 0.3         # lower = more detections, higher = fewer false positives
 
-&#x20; classes: \[2, 3, 5, 7]    # car, motorcycle, bus, truck
+&#x20; classes: \[2, 3, 5, 7]  # COCO IDs: car, motorcycle, bus, truck
 
 
 
@@ -154,9 +188,9 @@ analytics:
 
 &#x20; counting\_line:
 
-&#x20;   start: \[0.1, 0.5]       # line position as fraction of frame
+&#x20;   start: \[0.1, 0.5]     # line position as fraction of frame size
 
-&#x20;   end: \[0.9, 0.5]
+&#x20;   end: \[0.9, 0.5]       # 0.5 = horizontal line at vertical midpoint
 
 ```
 
@@ -166,17 +200,23 @@ analytics:
 
 
 
-\## Results
+\## 📊 Results
 
 
 
-\- Processed 3000 frames of traffic footage
+| Metric | Value |
 
-\- Counted 123 vehicles crossing the virtual line
+|---|---|
 
-\- Tracker maintained persistent IDs across full video duration
+| Video length | 3000 frames |
 
-\- Pipeline runs at real-time capable speeds on CPU
+| Vehicles counted | 123 |
+
+| Max vehicles tracked simultaneously | 14 |
+
+| Detection classes | Car, Motorcycle, Bus, Truck |
+
+| Model used | YOLOv8n (nano) |
 
 
 
@@ -184,7 +224,29 @@ analytics:
 
 
 
-\## Tech stack
+\## 🧪 Testing and CI
+
+```bash
+
+py -m pytest tests/ -v
+
+```
+
+
+
+5 unit tests covering counting logic — no crossing, single crossing, double-count prevention, multiple vehicles, above-line filtering.
+
+
+
+GitHub Actions runs all tests automatically on every push. Green badge = all passing.
+
+
+
+\---
+
+
+
+\## 🧰 Tech Stack
 
 
 
@@ -210,37 +272,17 @@ analytics:
 
 
 
-\## Key engineering decisions
+\## ⚠️ Limitations
 
 
 
-\*\*Why ByteTrack?\*\* Simple, fast, no re-identification model needed. Works well on traffic scenes where objects follow predictable motion paths.
+\- Track IDs reset if a vehicle leaves and re-enters the frame
 
+\- Counting line is fixed per run — not adaptive
 
+\- CPU inference is slower than real-time on 1080p+ video
 
-\*\*Why config-driven?\*\* Separating settings from code means changing the counting line or confidence threshold requires zero code changes — just edit the YAML.
-
-
-
-\*\*Why YOLOv8n?\*\* The nano model is fast enough for real-time use on CPU while still achieving good detection accuracy on standard traffic scenes.
-
-
-
-\---
-
-
-
-\## Limitations
-
-
-
-\- Tracking can lose IDs when vehicles are heavily occluded or overlap
-
-\- Counting line is fixed per run — not adaptive to scene geometry
-
-\- No re-identification — a vehicle that leaves and re-enters the frame gets a new ID
-
-\- CPU inference is slower than real-time on high resolution video
+\- Occlusion between vehicles can cause brief ID switches
 
 
 
@@ -248,11 +290,17 @@ analytics:
 
 
 
-\## Author
+\## 👤 Author
 
 
 
-Shiv Jayant Chaudhary
+\*\*Shiv Jayant Chaudhary\*\*
 
-\[LinkedIn](https://linkedin.com/in/shiv1716) | \[GitHub](https://github.com/SHIVCHAUDHARY17)
+Computer Vision and Machine Learning Engineer
+
+
+
+\[!\[LinkedIn](https://img.shields.io/badge/LinkedIn-shiv1716-blue)](https://linkedin.com/in/shiv1716)
+
+\[!\[GitHub](https://img.shields.io/badge/GitHub-SHIVCHAUDHARY17-black)](https://github.com/SHIVCHAUDHARY17)
 
